@@ -1,0 +1,107 @@
+function App() {
+    const classes = useStyles();
+    const [web3, setWeb3] = useState(null); // State variable to store the Web3 instance
+    const [account, setAccount] = useState(null); // State variable to store the user's Ethereum account
+    const [network, setNetwork] = useState(null); // State variable to store the current Ethereum network
+    const [degreeTokenId, setDegreeTokenId] = useState(null); // State variable to store the ID of the selected School Degree NFT
+    const [degreeToken, setDegreeToken] = useState(null); // State variable to store the information for the selected School Degree NFT
+  
+    // Connect to the Ethereum network and get the user's account
+    useEffect(() => {
+      // Get the Web3 instance
+      const web3 = new Web3(window.web3.currentProvider);
+  
+      // Get the current Ethereum network
+      web3.eth.net.getId().then((networkId) => setNetwork(networkId));
+  
+      // Get the user's Ethereum account
+      web3.eth.getAccounts().then(([account]) => setAccount(account));
+  
+      // Set the Web3 instance in the state
+      setWeb3(web3);
+    }, []);
+  
+    // Get the School Degrees contract instance
+    const contract = useMemo(() => {
+      if (web3 && network && SchoolDegrees.networks[network]) {
+        return new web3.eth.Contract(
+          SchoolDegrees.abi,
+          SchoolDegrees.networks[network].address
+        );
+      }
+      return null;
+    }, [web3, network]);
+  
+    // Fetch the information for the selected School Degree NFT
+    useEffect(() => {
+      if (degreeTokenId && contract) {
+        contract.methods
+          .getDegreeInfo(degreeTokenId)
+          .call()
+          .then((degreeToken) => setDegreeToken(degreeToken));
+      }
+    }, [degreeTokenId, contract]);
+  
+    // Handle form submission for minting a new School Degree NFT
+    const handleMintSubmit = async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const degree = form.elements["degree"].value;
+      const school = form.elements["school"].value;
+      const year = form.elements["year"].value;
+      await contract.methods.mint(degree, school, year).send({ from: account });
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect } from "react";
+import Web3 from "web3";
+import SchoolDegrees from "./SchoolDegrees.json"; // Import the School Degrees contract JSON file
+import hdkey from "hdkey"; // Import the hdkey library for loading and saving wallet accounts
+import { createStyles, makeStyles } from "@material-ui/core/styles"; // Import the Material-UI library for styling
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+
+const useStyles = makeStyles(() =>
+  createStyles({
+    formControl: {
+      margin: "10px",
+    },
+    select: {
+      minWidth: "150px",
+    },
+    table: {
+      minWidth: 650,
+    },
+  })
+);
+
+function App() {
+  const classes = useStyles();
+  const [web3, setWeb3] = useState(null); // State variable to store the Web3 instance
+  const [account, setAccount] = useState(null); // State variable to store the user's Ethereum account
+  const [network, setNetwork] = useState(null); // State variable to store the current Ethereum network
+  const [degreeTokenId, setDegreeTokenId] = useState(null); // State variable to store the ID
+}
